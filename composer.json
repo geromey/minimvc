@@ -1,4 +1,5 @@
 {
+    "name": "geromey/minimvc",
     "require": {
         "mageekguy/atoum": "dev-master"
     }
