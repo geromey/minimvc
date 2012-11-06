@@ -1,5 +1,7 @@
 <?php
-abstract class MiniMVC_Controller {
+namespace minimvc;
+
+abstract class Controller {
     /**
      * @var string
      */

@@ -1,24 +1,21 @@
 <?php
 
-namespace test\units;
+namespace minimvc\tests\units;
 
-use \mageekguy\atoum;
-//use \vendor\project;
+use minimvc;
 
-include_once dirname(__FILE__) . '/BaseUnitTest.php';
+require_once __DIR__ . '/Test.php';
 
-class MiniMVC_Controller extends BaseUnitTest
+class Controller extends Test
 {
     public function testGetBaseUrl()
     {
-    
-        $mock = new \mock\MiniMVC_Controller;
+        $mock = new \mock\minimvc\Controller;
 
         $_SERVER = array(
             'SCRIPT_NAME' => '/folder/index.php',
             'SERVER_NAME' => 'server_name.com',
         );
-
         $this->string($mock->getBaseUrl())->isEqualTo('http://server_name.com/folder/')
         ;
 
@@ -26,32 +23,29 @@ class MiniMVC_Controller extends BaseUnitTest
             'SCRIPT_NAME' => '/index.php',
             'SERVER_NAME' => 'server_name.com',
         );
-
         $this->string($mock->getBaseUrl())->isEqualTo('http://server_name.com/')
         ;
 
         $_SERVER = array(
             'SCRIPT_NAME' => '/index.php',
             'SERVER_NAME' => 'server_name.com',
-            'HTTPS' => 'on'
+            'HTTPS' => 'on',
         );
-
         $this->string($mock->getBaseUrl())->isEqualTo('https://server_name.com/')
         ;
-
         
         $_SERVER = array(
             'SCRIPT_NAME' => '/some/other/folder/index.php',
             'SERVER_NAME' => 'www.server_name.com',
-            'HTTPS' => 'on'
+            'HTTPS' => 'on',
         );
-
         $this->string($mock->getBaseUrl())->isEqualTo('https://www.server_name.com/some/other/folder/')
         ;
     }
+
     public function testGetWords()
     {
-        $mock = new \mock\MiniMVC_Controller;
+        $mock = new \mock\minimvc\Controller;
 
         $_SERVER = array(
             'REQUEST_URI' => "/first/second/third",

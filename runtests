@@ -4,4 +4,4 @@
 # php composer.phar install --dev
 #
 
-php vendor/mageekguy/atoum/scripts/runner.php -d test
+php vendor/mageekguy/atoum/scripts/runner.php -d src
