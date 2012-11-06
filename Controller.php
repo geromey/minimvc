@@ -83,8 +83,10 @@ abstract class MiniMVC_Controller {
      * @return string
      */
     static public function getBaseUrl() {
-        $url = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
-        return 'http://' . $_SERVER['SERVER_NAME'] . $url;
+        return
+            'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 's': '') . '://'
+            . $_SERVER['SERVER_NAME']
+            . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
     }
     /**
      * get the words that compose the URL
