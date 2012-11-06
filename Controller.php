@@ -131,7 +131,7 @@ abstract class MiniMVC_Controller {
         $this->runFrontController();
     }
     /**
-     * 
+     * Say if the controller is using languages
      *
      * @return boolean
      */
