@@ -130,6 +130,11 @@ abstract class MiniMVC_Controller {
         $this->preRun();
         $this->runFrontController();
     }
+    /**
+     * 
+     *
+     * @return boolean
+     */
     protected function useLang() {
         return ($this->_autorisedLangs !== null);
     }
