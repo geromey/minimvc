@@ -1,7 +1,7 @@
 {
     "name": "geromey/minimvc",
     "type": "library",
-    "description": "Very Simple PHP MVC scricture to create quickly websites",
+    "description": "Very Simple PHP MVC structure to quickly create websites",
     "keywords": ["mvc"],
     "license": "BSD",
     "require": {

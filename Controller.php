@@ -82,7 +82,7 @@ abstract class MiniMVC_Controller {
      *
      * @return string
      */
-    static public function getBaseUrl() {
+    public function getBaseUrl() {
         return
             'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 's': '') . '://'
             . $_SERVER['SERVER_NAME']
@@ -93,12 +93,17 @@ abstract class MiniMVC_Controller {
      *
      * @return string
      */
-    protected function getWords() {
+    public function getWords() {
         $shortUrl = trim(substr($_SERVER['REQUEST_URI'], strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'))), '/');
+        $pos = strpos($shortUrl, '?');
+        if ($pos !== false) {
+            $shortUrl = substr($shortUrl, 0, $pos -1);
+        }
         $words = explode('/', $shortUrl);
         if ('' == $words[0]) {
             array_shift($words);
         }
+        return $words;
     }
     /**
      * Run Controller

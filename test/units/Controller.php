@@ -11,12 +11,15 @@ class MiniMVC_Controller extends BaseUnitTest
 {
     public function testGetBaseUrl()
     {
+    
+        $mock = new \mock\MiniMVC_Controller;
+
         $_SERVER = array(
             'SCRIPT_NAME' => '/folder/index.php',
             'SERVER_NAME' => 'server_name.com',
         );
 
-        $this->string(\MiniMVC_Controller::getBaseUrl())->isEqualTo('http://server_name.com/folder/')
+        $this->string($mock->getBaseUrl())->isEqualTo('http://server_name.com/folder/')
         ;
 
         $_SERVER = array(
@@ -24,7 +27,7 @@ class MiniMVC_Controller extends BaseUnitTest
             'SERVER_NAME' => 'server_name.com',
         );
 
-        $this->string(\MiniMVC_Controller::getBaseUrl())->isEqualTo('http://server_name.com/')
+        $this->string($mock->getBaseUrl())->isEqualTo('http://server_name.com/')
         ;
 
         $_SERVER = array(
@@ -33,7 +36,7 @@ class MiniMVC_Controller extends BaseUnitTest
             'HTTPS' => 'on'
         );
 
-        $this->string(\MiniMVC_Controller::getBaseUrl())->isEqualTo('https://server_name.com/')
+        $this->string($mock->getBaseUrl())->isEqualTo('https://server_name.com/')
         ;
 
         
@@ -43,7 +46,48 @@ class MiniMVC_Controller extends BaseUnitTest
             'HTTPS' => 'on'
         );
 
-        $this->string(\MiniMVC_Controller::getBaseUrl())->isEqualTo('https://www.server_name.com/some/other/folder/')
+        $this->string($mock->getBaseUrl())->isEqualTo('https://www.server_name.com/some/other/folder/')
         ;
+    }
+    public function testGetWords()
+    {
+        $mock = new \mock\MiniMVC_Controller;
+
+        $_SERVER = array(
+            'REQUEST_URI' => "/first/second/third",
+            'SCRIPT_NAME' => "/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array('first','second','third'));
+
+        $_SERVER = array(
+            'REQUEST_URI' => "/first/second/third/",
+            'SCRIPT_NAME' => "/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array('first','second','third'));
+
+        $_SERVER = array(
+            'REQUEST_URI' => "/base/first/second/third/",
+            'SCRIPT_NAME' => "/base/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array('first','second','third'));
+                
+        $_SERVER = array(
+            'REQUEST_URI' => "/base/first/",
+            'SCRIPT_NAME' => "/base/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array('first'));
+
+        $_SERVER = array(
+            'REQUEST_URI' => "/base/first",
+            'SCRIPT_NAME' => "/base/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array('first'));
+
+        $_SERVER = array(
+            'REQUEST_URI' => "/base/",
+            'SCRIPT_NAME' => "/base/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array());
+        
     }
 }
