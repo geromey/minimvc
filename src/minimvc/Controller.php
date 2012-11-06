@@ -162,9 +162,9 @@ abstract class Controller {
         $this->$method();
         // VIEW
         if ($this->useLang()) {
-            $viewFile = sprintf('%s/%s/%s.php', $this->getViewPath(), $this->lang, $this->action);
+            $viewFile = sprintf('%s/%s/%s.php', rtrim($this->getViewPath(),'/'), $this->lang, $this->action);
         } else {
-            $viewFile = sprintf('%s/%s.php', $this->getViewPath(), $this->action);
+            $viewFile = sprintf('%s/%s.php', rtrim($this->getViewPath(),'/'), $this->action);
         }
         ob_start();
         if (!$this->includeTemplate($viewFile, $this->_data) && $this->lang != $this->getDefaultLang()) {

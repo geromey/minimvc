@@ -1,9 +1,17 @@
 {
     "name": "geromey/minimvc",
+    "description": "Simple PHP MVC structure",
     "type": "library",
-    "description": "Very Simple PHP MVC structure to quickly create websites",
-    "keywords": ["mvc"],
-    "license": "BSD",
+    "keywords" : ["mvc"],
+    "homepage" : "http://github.com/geromey/minimvc",
+    "license" : "GPL-3.0",
+    "authors" : [
+    	{
+			"name"    : "Gerome ROMEY",
+			"email"   : "gerome.romey@gmail.com",
+			"homepage": "http://geromey.com"
+		}
+	],
     "require-dev": {
         "mageekguy/atoum": "dev-master"
     },
