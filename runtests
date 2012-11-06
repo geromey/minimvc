@@ -1,7 +1,7 @@
 #
 # You most install Atoum with composer in order to run the tests
 # wget http://getcomposer.org/composer.phar
-# php composer.phar install
+# php composer.phar install --dev
 #
 
 php vendor/mageekguy/atoum/scripts/runner.php -d test

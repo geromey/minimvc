@@ -4,7 +4,7 @@
     "description": "Very Simple PHP MVC structure to quickly create websites",
     "keywords": ["mvc"],
     "license": "BSD",
-    "require": {
+    "require-dev": {
         "mageekguy/atoum": "dev-master"
     }
 }
