@@ -12,7 +12,6 @@ abstract class MiniMVC_Controller {
      * Magic method to get template data
      *
      * @param string $name
-     *
      * @return mixed
      */
     public function __get($name) {
@@ -22,7 +21,6 @@ abstract class MiniMVC_Controller {
      * Magic method to check if template data exists
      *
      * @param string $name
-     *
      * @return boolean
      */
     public function __isset($name) {
@@ -32,7 +30,6 @@ abstract class MiniMVC_Controller {
      * Magic Method to set template data
      *
      * @param string$name
-     *
      * @param mixed $value
      */
     public function __set($name, $value) {
@@ -41,7 +38,6 @@ abstract class MiniMVC_Controller {
     abstract protected function getViewPath();
     /**
      * @param string $layout
-     *
      * @return MiniMVC_Controller
      */
     protected function setLayout($layout) {
@@ -63,7 +59,6 @@ abstract class MiniMVC_Controller {
     /**
      * return the default lang.
      * This function most be overriden when using multi languages
-     *
      */
     protected function getDefaultLang() {
         return null;
@@ -87,9 +82,9 @@ abstract class MiniMVC_Controller {
      *
      * @return string
      */
-    protected function getBaseUrl() {
+    static public function getBaseUrl() {
         $url = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
-        $this->baseUrl = 'http://' . $_SERVER['SERVER_NAME'] . $url;
+        return 'http://' . $_SERVER['SERVER_NAME'] . $url;
     }
     /**
      * get the words that compose the URL
@@ -106,7 +101,6 @@ abstract class MiniMVC_Controller {
     /**
      * Run Controller
      *
-     * @throws RuntimeException
      */
     public function run() {
         $baseUrl = $this->getBaseUrl();
