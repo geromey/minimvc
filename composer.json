@@ -1,5 +1,9 @@
 {
     "name": "geromey/minimvc",
+    "type": "library",
+    "description": "Very Simple PHP MVC scricture to create quickly websites",
+    "keywords": ["mvc"],
+    "license": "BSD",
     "require": {
         "mageekguy/atoum": "dev-master"
     }
