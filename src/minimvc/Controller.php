@@ -102,13 +102,13 @@ abstract class Controller {
      * @return string
      */
     public function getWords() {
-        $shortUrl = trim(substr($_SERVER['REQUEST_URI'], strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'))), '/');
-        $pos = strpos($shortUrl, '?');
-        if ($pos !== false) {
-            $shortUrl = substr($shortUrl, 0, $pos -1);
-        }
-        $words = explode('/', $shortUrl);
-        if ('' == $words[0]) {
+        $requestUrl = explode('?', $_SERVER['REQUEST_URI'])[0];
+        $words = explode('/',trim(
+                substr($requestUrl,
+                    strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'))
+                )
+        , '/'));
+        if ($words[0] === '') {
             array_shift($words);
         }
         return $words;

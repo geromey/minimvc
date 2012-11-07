@@ -83,5 +83,23 @@ class Controller extends Test
         );
         $this->array($mock->getWords())->isEqualTo(array());
         
+        $_SERVER = array(
+            'REQUEST_URI' => "/base/?param=123",
+            'SCRIPT_NAME' => "/base/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array());
+        
+        $_SERVER = array(
+            'REQUEST_URI' => "/base/first/?param=123",
+            'SCRIPT_NAME' => "/base/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array('first'));
+        
+        $_SERVER = array(
+            'REQUEST_URI' => "/first/second?param=123&pother=bla",
+            'SCRIPT_NAME' => "/index.php",
+        );
+        $this->array($mock->getWords())->isEqualTo(array('first','second'));
+        
     }
 }
