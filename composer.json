@@ -3,7 +3,7 @@
     "description": "Simple PHP MVC structure",
     "type": "library",
     "keywords" : ["mvc"],
-    "homepage" : "http://github.com/geromey/minimvc",
+    "homepage" : "http://minimvc.geromey.com",
     "license" : "GPL-3.0",
     "authors" : [
     	{
