@@ -11,6 +11,12 @@ abstract class Controller {
      */
     protected $_data = array();
     /**
+     * @var string
+     */
+    protected $_baseUrl;
+    
+
+    /**
      * Magic method to get template data
      *
      * @param string $name
@@ -112,17 +118,17 @@ abstract class Controller {
      *
      */
     public function run() {
-        $baseUrl = $this->getBaseUrl();
+        $this->_baseUrl = $this->getBaseUrl();
         $words = $this->getWords();
         if ($this->useLang()) {
             $this->lang = '';
             if (count($words) == 0) {
-                $this->redirect($baseUrl . $this->getDefaultLang() . '/');
+                $this->redirect($this->_baseUrl . $this->getDefaultLang() . '/');
             }
             $this->lang = $words[0];
             array_shift($words);
             if (!in_array($this->lang, $this->getAutorisedLangs())) {
-                $this->redirect($baseUrl . $this->getDefaultLang() . '/');
+                $this->redirect($this->_baseUrl . $this->getDefaultLang() . '/');
             }
         }
         if (count($words) == 0) {
@@ -166,11 +172,13 @@ abstract class Controller {
         } else {
             $viewFile = sprintf('%s/%s.php', rtrim($this->getViewPath(),'/'), $this->action);
         }
+        
         ob_start();
-        if (!$this->includeTemplate($viewFile, $this->_data) && $this->lang != $this->getDefaultLang()) {
-            $viewFile = sprintf('%s/%s/%s%s.php', $this->_viewPath, $this->getDefaultLang(), $this->action, ucfirst($viewType));
+        if (!$this->includeTemplate($viewFile, $this->_data) && $this->useLang() && $this->lang != $this->getDefaultLang()) {
+            $viewFile = sprintf('%s/%s/%s%s.php', rtrim($this->getViewPath(),'/'), $this->getDefaultLang(), $this->action, ucfirst($viewType));
             $this->includeTemplate($viewFile, $this->_data);
         }
+        
         $__content__ = ob_get_contents();
         ob_end_clean();
         // LAYOUT
@@ -178,7 +186,7 @@ abstract class Controller {
         if ($layout === null) {
             echo $__content__;
         } else {
-            $layoutFile = sprintf('%s/__%s.php', $this->_viewPath, $layout);
+            $layoutFile = sprintf('%s/__%s.php', rtrim($this->getViewPath(),'/'), $layout);
             $this->noLayout();
             // add content in data
             $this->__content__ = $__content__;
@@ -207,7 +215,7 @@ abstract class Controller {
             require $viewFile;
             return true;
         } else {
-            error_log('Unknown view "' . $viewFile . '"');
+            error_log('Unknown View "' . $viewFile . '"');
             return false;
         }
     }
