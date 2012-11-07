@@ -7,14 +7,21 @@ abstract class Controller {
      */
     private $_layout = 'default';
     /**
-     * @var array
+     * @var string
      */
-    protected $_data = array();
+    private $_baseUrl = null;
     /**
      * @var string
      */
-    protected $_baseUrl;
-    
+    private $_action = null;
+    /**
+     * @var array
+     */
+    private $_words = null;
+    /**
+     * @var array
+     */
+    protected $_data = array();
 
     /**
      * Magic method to get template data
@@ -43,7 +50,9 @@ abstract class Controller {
     public function __set($name, $value) {
         $this->_data[$name] = $value;
     }
-    abstract protected function getViewPath();
+    protected function getViewPath() {
+        return __DIR__ . '/../../../../../views';
+    }
     /**
      * @param string $layout
      * @return MiniMVC_Controller
@@ -91,10 +100,12 @@ abstract class Controller {
      * @return string
      */
     public function getBaseUrl() {
-        return
-            'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 's': '') . '://'
-            . $_SERVER['SERVER_NAME']
-            . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
+        if ($this->_baseUrl === null) {
+            $this->_baseUrl = 'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 's': '') . '://'
+                . $_SERVER['SERVER_NAME']
+                . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
+        }
+        return $this->_baseUrl;
     }
     /**
      * get the words that compose the URL
@@ -102,50 +113,70 @@ abstract class Controller {
      * @return string
      */
     public function getWords() {
-        $requestUrl = explode('?', $_SERVER['REQUEST_URI'])[0];
-        $words = explode('/',trim(
+        if ($this->_words === null) {
+            $requestUrl = explode('?', $_SERVER['REQUEST_URI'])[0];
+            $words = explode('/',trim(
                 substr($requestUrl,
                     strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'))
                 )
-        , '/'));
-        if ($words[0] === '') {
-            array_shift($words);
+            , '/'));
+            if ($words[0] === '') {
+                array_shift($words);
+            }
+
+            if ($this->useLang()) {
+                $this->lang = '';
+                if (count($words) === 0) {
+                    $this->redirect($this->getBaseUrl() . $this->getDefaultLang() . '/');
+                }
+                $this->lang = $words[0];
+                array_shift($words);
+                if (!in_array($this->lang, $this->getAutorisedLangs())) {
+                    $this->redirect($this->getBaseUrl() . $this->getDefaultLang() . '/');
+                }
+            }
+            if (count($words) === 0) {
+                $action = 'index';
+            } else {
+                $action = $words[0];
+                array_shift($words);
+            }
+            // only set the action if it was not set before
+            if ($this->_action === null) {
+                $this->setAction($action);
+            }
+            $this->_words = $words;
         }
         return $words;
     }
+    public function getAction() {
+        if ($this->_action === null) {
+            // the name of the action is determinated when calculating the words
+            $this->getWords();
+        }
+        return $this->_action;
+    }
+    public function setAction($action) {
+        $this->_action = $action;
+    }
     /**
      * Run Controller
-     *
      */
     public function run() {
-        $this->_baseUrl = $this->getBaseUrl();
-        $words = $this->getWords();
-        if ($this->useLang()) {
-            $this->lang = '';
-            if (count($words) == 0) {
-                $this->redirect($this->_baseUrl . $this->getDefaultLang() . '/');
-            }
-            $this->lang = $words[0];
-            array_shift($words);
-            if (!in_array($this->lang, $this->getAutorisedLangs())) {
-                $this->redirect($this->_baseUrl . $this->getDefaultLang() . '/');
-            }
-        }
-        if (count($words) == 0) {
-            $this->action = 'index';
-        } else {
-            $this->action = $words[0];
-            array_shift($words);
-        }
-        $this->words = $words;
         // fix the charset
         header('Content-type: text/html; charset=utf-8');
         $this->preRun();
         $this->runFrontController();
     }
     /**
+     * return the method name of a specific action
+     * @return boolean
+     */
+    public function getMethodName() {
+        return 'do' . ucfirst($this->getAction());
+    }
+    /**
      * Say if the controller is using languages
-     *
      * @return boolean
      */
     protected function useLang() {
@@ -158,39 +189,68 @@ abstract class Controller {
      */
     private function runFrontController() {
         // CONTROLLER
-        $method = 'do' . ucfirst($this->action);
+        $method = $this->getMethodName();
         if (!method_exists($this, $method)) {
             error_log('Unknown Action "' . $this->action . '"');
-            $this->badAction = $this->action;
-            $action = 'error404';
-            $method = 'doError404';
+            $this->badAction = $this->getAction();
+            $this->setAction('error404');
+            $method = $this->getMethodName();
         }
         $this->$method();
-        // VIEW
+        $viewFile = $this->getViewFile();
+        if ($viewFile !== false) {
+            // load the view
+            ob_start();
+            $this->includeTemplate($viewFile);
+            $this->__content__ = ob_get_contents();
+            ob_end_clean();
+            // load the layout
+            $layoutFile = $this->getLayoutFile();
+            if ($layoutFile === false) {
+                // if there is no layout, simply echo the content
+                echo $this->__content__;
+            } else {
+                $this->includeTemplate($layoutFile);
+            }
+        }
+    }
+    /**
+     * return the path to the view
+     *
+     * @return string path to the view
+     */
+    public function getViewFile() {
         if ($this->useLang()) {
-            $viewFile = sprintf('%s/%s/%s.php', rtrim($this->getViewPath(),'/'), $this->lang, $this->action);
+            $viewFile = sprintf('%s/%s/%s.php', rtrim($this->getViewPath(),'/'), $this->lang, $this->getAction());
+            if (!file_exists($viewFile)) {
+                // if the view does not exists in the selected language
+                // then we use the default language view
+                $viewFile = sprintf('%s/%s/%s%s.php', rtrim($this->getViewPath(),'/'), $this->getDefaultLang(), $this->getAction());
+            }
         } else {
-            $viewFile = sprintf('%s/%s.php', rtrim($this->getViewPath(),'/'), $this->action);
+            $viewFile = sprintf('%s/%s.php', rtrim($this->getViewPath(),'/'), $this->getAction());
         }
-        
-        ob_start();
-        if (!$this->includeTemplate($viewFile, $this->_data) && $this->useLang() && $this->lang != $this->getDefaultLang()) {
-            $viewFile = sprintf('%s/%s/%s%s.php', rtrim($this->getViewPath(),'/'), $this->getDefaultLang(), $this->action, ucfirst($viewType));
-            $this->includeTemplate($viewFile, $this->_data);
+        if (file_exists($viewFile)) {
+            return $viewFile;
+        } else {
+            return false;
         }
-        
-        $__content__ = ob_get_contents();
-        ob_end_clean();
-        // LAYOUT
+    }
+    /**
+     * return the path to the view
+     *
+     * @return string path to the view
+     */
+    public function getLayoutFile() {
         $layout = $this->getLayout();
-        if ($layout === null) {
-            echo $__content__;
+        if (null === $layout) {
+            return false;
+        }
+        $layoutFile = sprintf('%s/__%s.php', rtrim($this->getViewPath(),'/'), $this->getLayout());
+        if (file_exists($layoutFile)) {
+            return $layoutFile;
         } else {
-            $layoutFile = sprintf('%s/__%s.php', rtrim($this->getViewPath(),'/'), $layout);
-            $this->noLayout();
-            // add content in data
-            $this->__content__ = $__content__;
-            $this->includeTemplate($layoutFile, $this->_data);
+            return false;
         }
     }
     /**
@@ -199,9 +259,9 @@ abstract class Controller {
      * @param string $view
      * @param array $parameters
      */
-    protected function includePartial($view, array $parameters = array()) {
+    protected function includePartial($view) {
         $viewFile = sprintf('%s/_%s.php', $this->_viewPath, $view);
-        $this->includeTemplate($viewFile, $parameters);
+        $this->includeTemplate($viewFile);
     }
     /**
      * Include a template
@@ -209,15 +269,9 @@ abstract class Controller {
      * @param string $viewFile
      * @param array $parameters
      */
-    private function includeTemplate($viewFile, array $parameters = array()) {
-        if (file_exists($viewFile)) {
-            extract($parameters);
-            require $viewFile;
-            return true;
-        } else {
-            error_log('Unknown View "' . $viewFile . '"');
-            return false;
-        }
+    private function includeTemplate($viewFile) {
+        extract($this->_data);
+        require $viewFile;
     }
     /**
      * default method for error 404 action
@@ -228,6 +282,11 @@ abstract class Controller {
         if (!headers_sent()) {
             header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
         }
+        if ($this->getViewFile() === false) {
+            // there is no error404 page, so we stop the code here
+            echo 'Error 404: Page Not Found!';
+            exit;
+        }
         return '';
     }
     public function getUrl($action = null, $lang = null) {
@@ -235,7 +294,7 @@ abstract class Controller {
             $lang = $this->lang;
         }
         if (null === $action) {
-            $action = $this->action;
+            $action = $this->getAction();
         }
         if ('index' == $action) {
             $action = '';
