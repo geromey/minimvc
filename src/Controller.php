@@ -44,14 +44,23 @@ abstract class Controller {
     /**
      * Magic Method to set template data
      *
-     * @param string$name
+     * @param string $name
      * @param mixed $value
      */
     public function __set($name, $value) {
         $this->_data[$name] = $value;
     }
+    /**
+     * return the path to the views
+     *
+     * @return string
+     */
     protected function getViewPath() {
         return __DIR__ . '/../../../../../views';
+    }
+    
+    protected function getViewsSubPath() {
+        return array('');
     }
     /**
      * @param string $layout
@@ -74,28 +83,20 @@ abstract class Controller {
         return $this->_layout;
     }
     /**
-     * return the default lang.
-     * This function most be overriden when using multi languages
-     */
-    protected function getDefaultLang() {
-        return null;
-    }
-    /**
-     * Set the autorised langs
-     * This function most be overriden when using multi languages
-     *
-     * @param array $langs
-     */
-    protected function getAutorisedLangs() {
-        return null;
-    }
-    /**
-     * Override preRun() if you want to run some code before any page
+     * override preRun() if you want to run some code before any page
      */
     protected function preRun() {
     }
     /**
-     * get the base url of the website
+     * possible callback which enable to modify the words
+     *
+     * @return string
+     */
+    protected function preSaveWords($words) {
+        return $words;
+    }
+    /**
+     * get the base url of your website
      *
      * @return string
      */
@@ -123,23 +124,20 @@ abstract class Controller {
             if ($words[0] === '') {
                 array_shift($words);
             }
+            
+            $this->preSaveWords($words);
 
-            if ($this->useLang()) {
-                $this->lang = '';
-                if (count($words) === 0) {
-                    $this->redirect($this->getBaseUrl() . $this->getDefaultLang() . '/');
-                }
-                $this->lang = $words[0];
-                array_shift($words);
-                if (!in_array($this->lang, $this->getAutorisedLangs())) {
-                    $this->redirect($this->getBaseUrl() . $this->getDefaultLang() . '/');
-                }
-            }
             if (count($words) === 0) {
                 $action = 'index';
             } else {
                 $action = $words[0];
                 array_shift($words);
+            }
+            if (7==9) {
+                echo 'oooo';
+                echo 'oooo';
+                echo 'oooo';
+                echo 'oooo';
             }
             // only set the action if it was not set before
             if ($this->_action === null) {
@@ -163,8 +161,6 @@ abstract class Controller {
      * Run Controller
      */
     public function run() {
-        // fix the charset
-        header('Content-type: text/html; charset=utf-8');
         $this->preRun();
         $this->runFrontController();
     }
@@ -176,16 +172,7 @@ abstract class Controller {
         return 'do' . ucfirst($this->getAction());
     }
     /**
-     * Say if the controller is using languages
-     * @return boolean
-     */
-    protected function useLang() {
-        return ($this->_autorisedLangs !== null);
-    }
-    /**
      * Run action and display view
-     *
-     * @param $action
      */
     private function runFrontController() {
         // CONTROLLER
@@ -197,7 +184,7 @@ abstract class Controller {
             $method = $this->getMethodName();
         }
         $this->$method();
-        $viewFile = $this->getViewFile();
+        $viewFile = $this->getActionFile();
         if ($viewFile !== false) {
             // load the view
             ob_start();
@@ -205,6 +192,8 @@ abstract class Controller {
             $this->__content__ = ob_get_contents();
             ob_end_clean();
             // load the layout
+            // fix the charset
+            header('Content-type: text/html; charset=utf-8');
             $layoutFile = $this->getLayoutFile();
             if ($layoutFile === false) {
                 // if there is no layout, simply echo the content
@@ -214,27 +203,28 @@ abstract class Controller {
             }
         }
     }
+    
     /**
      * return the path to the view
      *
      * @return string path to the view
      */
-    public function getViewFile() {
-        if ($this->useLang()) {
-            $viewFile = sprintf('%s/%s/%s.php', rtrim($this->getViewPath(),'/'), $this->lang, $this->getAction());
-            if (!file_exists($viewFile)) {
-                // if the view does not exists in the selected language
-                // then we use the default language view
-                $viewFile = sprintf('%s/%s/%s%s.php', rtrim($this->getViewPath(),'/'), $this->getDefaultLang(), $this->getAction());
+    public function getViewFile($viewName) {
+        foreach ($this->getViewsSubPath() as $subPath) {
+            $viewFile = sprintf('%s/%s%s.php', $this->getViewPath(), $subPath, $viewName);
+            if (file_exists($viewFile)) {
+                return $viewFile;
             }
-        } else {
-            $viewFile = sprintf('%s/%s.php', rtrim($this->getViewPath(),'/'), $this->getAction());
         }
-        if (file_exists($viewFile)) {
-            return $viewFile;
-        } else {
-            return false;
-        }
+        return false;
+    }
+    /**
+     * return the path to the view
+     *
+     * @return string path to the view
+     */
+    public function getActionFile() {
+        return $this->getViewFile($this->getAction());
     }
     /**
      * return the path to the view
@@ -246,11 +236,8 @@ abstract class Controller {
         if (null === $layout) {
             return false;
         }
-        $layoutFile = sprintf('%s/__%s.php', rtrim($this->getViewPath(),'/'), $this->getLayout());
-        if (file_exists($layoutFile)) {
-            return $layoutFile;
-        } else {
-            return false;
+        else {
+            return $this->getViewFile('__' . $this->getLayout());
         }
     }
     /**
@@ -260,7 +247,7 @@ abstract class Controller {
      * @param array $parameters
      */
     protected function includePartial($view) {
-        $viewFile = sprintf('%s/_%s.php', $this->_viewPath, $view);
+        $viewFile = sprintf('%s/_%s.php', rtrim($this->getViewPath(),'/'), $view);
         $this->includeTemplate($viewFile);
     }
     /**
@@ -280,44 +267,14 @@ abstract class Controller {
      */
     protected function doError404() {
         if (!headers_sent()) {
-            header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+            header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
         }
-        if ($this->getViewFile() === false) {
+        if ($this->getActionFile() === false) {
             // there is no error404 page, so we stop the code here
             echo 'Error 404: Page Not Found!';
             exit;
         }
-        return '';
-    }
-    public function getUrl($action = null, $lang = null) {
-        if (null === $lang) {
-            $lang = $this->lang;
-        }
-        if (null === $action) {
-            $action = $this->getAction();
-        }
-        if ('index' == $action) {
-            $action = '';
-        }
-        return htmlspecialchars($lang . '/' . $action);
-    }
-    protected function url($action = null, $lang = null) {
-        echo $this->getUrl($action, $lang);
-    }
-    protected function getOut() {
-        $langId = 0;
-        $numArgs = func_num_args();
-        foreach ($this->getAutorisedLangs() as $id => $autorisedLang) {
-            if ($this->lang == $autorisedLang && $id < $numArgs) {
-                $langId = $id;
-                break;
-            }
-        }
-        return htmlspecialchars(func_get_arg($langId));
-    }
-    protected function out() {
-        $args = func_get_args();
-        echo call_user_func_array(array($this, 'getOut'), $args);
+        return;
     }
     private function redirect($url) {
         //error_log('Location: ' . $url);

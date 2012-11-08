@@ -49,64 +49,64 @@ class Controller extends Test
     {
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/first/second/third",
-            'SCRIPT_NAME' => "/index.php",
+            'REQUEST_URI' => '/first/second/third',
+            'SCRIPT_NAME' => '/index.php',
         );        
         $this->array($mock->getWords())->isEqualTo(array('second','third'));
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/first/second/third/",
-            'SCRIPT_NAME' => "/index.php",
+            'REQUEST_URI' => '/first/second/third/',
+            'SCRIPT_NAME' => '/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array('second','third'));
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/first/second/third/",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/first/second/third/',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array('second','third'));
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/first/",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/first/',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array());
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/first",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/first',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array());
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array());
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/?param=123",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/?param=123',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array());
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/first/?param=123",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/first/?param=123',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array());
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/first/second?param=123&pother=bla",
-            'SCRIPT_NAME' => "/index.php",
+            'REQUEST_URI' => '/first/second?param=123&pother=bla',
+            'SCRIPT_NAME' => '/index.php',
         );
         $this->array($mock->getWords())->isEqualTo(array('second'));
     }
@@ -114,37 +114,37 @@ class Controller extends Test
     public function testGetAction() {
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/first/second?param=123&pother=bla",
-            'SCRIPT_NAME' => "/index.php",
+            'REQUEST_URI' => '/first/second?param=123&pother=bla',
+            'SCRIPT_NAME' => '/index.php',
         );
         $this->string($mock->getAction())->isEqualTo('first');
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->string($mock->getAction())->isEqualTo('index');
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/action",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/action',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->string($mock->getAction())->isEqualTo('action');
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/action/",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/action/',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $mock->setAction('otherAction');
         $this->string($mock->getAction())->isEqualTo('otherAction');
 
         $mock = new \mock\minimvc\Controller;
         $_SERVER = array(
-            'REQUEST_URI' => "/base/action/",
-            'SCRIPT_NAME' => "/base/index.php",
+            'REQUEST_URI' => '/base/action/',
+            'SCRIPT_NAME' => '/base/index.php',
         );
         $this->string($mock->getAction())->isEqualTo('action');
         $mock->setAction('otherAction');

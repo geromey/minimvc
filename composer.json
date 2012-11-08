@@ -16,8 +16,6 @@
         "mageekguy/atoum": "dev-master"
     },
     "autoload": {
-        "psr-0": {
-            "minimvc": "src/"
-        }
+        "classmap": [ "src/" ]
     }
 }
