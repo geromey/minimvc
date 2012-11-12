@@ -22,6 +22,14 @@ abstract class Controller {
      * @var array
      */
     protected $_data = array();
+    /**
+     * @var array
+     */
+    private $_css = array();
+    /**
+     * @var array
+     */
+    private $_js = array();
 
     /**
      * Magic method to get template data
@@ -125,7 +133,7 @@ abstract class Controller {
                 array_shift($words);
             }
             
-            $this->preSaveWords($words);
+            $words = $this->preSaveWords($words);
 
             if (count($words) === 0) {
                 $action = 'index';
@@ -145,7 +153,7 @@ abstract class Controller {
             }
             $this->_words = $words;
         }
-        return $words;
+        return $this->_words;
     }
     public function getAction() {
         if ($this->_action === null) {
@@ -280,5 +288,23 @@ abstract class Controller {
         //error_log('Location: ' . $url);
         header('Location: ' . $url);
         exit;
+    }
+    public function addCss($url) {
+        $this->_css[] = $url;
+    }
+    public function addJs($url) {
+        $this->_js[] = $url;
+    }
+    public function head() {
+        // url
+        echo '<base href="' . htmlspecialchars($this->getBaseUrl()) . '" />';
+        // add css
+        foreach($this->_css as $css) {
+            echo '<link rel="stylesheet" href="' . htmlspecialchars($css) . '" />';
+        }
+        // add js
+        foreach($this->_js as $js) {
+            echo '<script src="' . htmlspecialchars($js) . '"></script>';
+        }
     }
 }
