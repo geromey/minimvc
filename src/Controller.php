@@ -186,7 +186,7 @@ abstract class Controller {
         // CONTROLLER
         $method = $this->getMethodName();
         if (!method_exists($this, $method)) {
-            error_log('Unknown Action "' . $this->action . '"');
+            error_log('Unknown Action "' . $this->getAction() . '"');
             $this->badAction = $this->getAction();
             $this->setAction('error404');
             $method = $this->getMethodName();
@@ -199,9 +199,10 @@ abstract class Controller {
             $this->includeTemplate($viewFile);
             $this->__content__ = ob_get_contents();
             ob_end_clean();
-            // load the layout
+            
             // fix the charset
             header('Content-type: text/html; charset=utf-8');
+            // load the layout
             $layoutFile = $this->getLayoutFile();
             if ($layoutFile === false) {
                 // if there is no layout, simply echo the content
@@ -211,7 +212,6 @@ abstract class Controller {
             }
         }
     }
-    
     /**
      * return the path to the view
      *
@@ -284,9 +284,14 @@ abstract class Controller {
         }
         return;
     }
-    private function redirect($url) {
+    protected function redirect($url) {
         //error_log('Location: ' . $url);
         header('Location: ' . $url);
+        exit;
+    }
+    protected function internalRedirect($action) {
+        $this->setAction($action);
+        $this->runFrontController();
         exit;
     }
     public function addCss($url) {

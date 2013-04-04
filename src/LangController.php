@@ -2,6 +2,12 @@
 namespace minimvc;
 
 abstract class LangController extends Controller {
+    
+    /**
+     * @var string
+     */
+    private $_translate = null;
+    
     /**
      * return the default lang.
      * This function most be overriden when using multi languages
@@ -15,6 +21,8 @@ abstract class LangController extends Controller {
      */
     abstract protected function getAutorisedLangs();
     
+    abstract protected function getTranslatePath();
+
     protected function getViewsSubPath() {
         $subPath = array('');
         if ($this->useLang()) {
@@ -53,19 +61,20 @@ abstract class LangController extends Controller {
         $this->getWords();
         parent::run();
     }
+
     /**
      * Say if the controller is using languages
      * @return boolean
      */
     protected function useLang() {
-        return ($this->_autorisedLangs !== null);
+        return ($this->getAutorisedLangs() !== null);
     }
     /**
      * return the path to the view
      *
      * @return string path to the view
      */
-    public function getViewFile() {
+/*    public function getViewFile() {
         if ($this->useLang()) {
             $viewFile = sprintf('%s/%s/%s.php', rtrim($this->getViewPath(),'/'), $this->lang, $this->getAction());
             if (!file_exists($viewFile)) {
@@ -82,17 +91,8 @@ abstract class LangController extends Controller {
         } else {
             return parent::getViewFile();
         }
-    }
-    /**
-     * Include a partial file
-     *
-     * @param string $view
-     * @param array $parameters
-     */
-    protected function includePartial($view) {
-        $viewFile = sprintf('%s/_%s.php', rtrim($this->getViewPath(),'/'), $view);
-        $this->includeTemplate($viewFile);
-    }
+    }*/
+
     public function getUrl($action = null, $lang = null) {
         if (null === $lang) {
             $lang = $this->lang;
@@ -108,6 +108,7 @@ abstract class LangController extends Controller {
     protected function url($action = null, $lang = null) {
         echo $this->getUrl($action, $lang);
     }
+
     protected function getOut() {
         $langId = 0;
         $numArgs = func_num_args();
@@ -119,8 +120,10 @@ abstract class LangController extends Controller {
         }
         return htmlspecialchars(func_get_arg($langId));
     }
+
     protected function out() {
         $args = func_get_args();
         echo call_user_func_array(array($this, 'getOut'), $args);
     }
+
 }
