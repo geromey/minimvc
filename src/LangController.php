@@ -69,29 +69,6 @@ abstract class LangController extends Controller {
     protected function useLang() {
         return ($this->getAutorisedLangs() !== null);
     }
-    /**
-     * return the path to the view
-     *
-     * @return string path to the view
-     */
-/*    public function getViewFile() {
-        if ($this->useLang()) {
-            $viewFile = sprintf('%s/%s/%s.php', rtrim($this->getViewPath(),'/'), $this->lang, $this->getAction());
-            if (!file_exists($viewFile)) {
-                // if the view does not exists in the selected language
-                // then we use the default language view
-                $viewFile = sprintf('%s/%s/%s%s.php', rtrim($this->getViewPath(),'/'), $this->getDefaultLang(), $this->getAction());
-                
-                if (file_exists($viewFile)) {
-                    return $viewFile;
-                } else {
-                    return false;
-                }
-            }
-        } else {
-            return parent::getViewFile();
-        }
-    }*/
 
     public function getUrl($action = null, $lang = null) {
         if (null === $lang) {
@@ -109,21 +86,18 @@ abstract class LangController extends Controller {
         echo $this->getUrl($action, $lang);
     }
 
-    protected function getOut() {
-        $langId = 0;
-        $numArgs = func_num_args();
-        foreach ($this->getAutorisedLangs() as $id => $autorisedLang) {
-            if ($this->lang == $autorisedLang && $id < $numArgs) {
-                $langId = $id;
-                break;
-            }
-        }
-        return htmlspecialchars(func_get_arg($langId));
+    /**
+     * Overide this function if you are using a specific translation function
+     * @param string $name
+     * @return boolean
+     */
+    protected function _($string) {
+        return htmlspecialchars($string);
     }
 
-    protected function out() {
+    protected function out($string) {
         $args = func_get_args();
-        echo call_user_func_array(array($this, 'getOut'), $args);
+        echo $this->_($string);
     }
 
 }
