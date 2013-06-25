@@ -123,7 +123,7 @@ abstract class Controller {
      */
     public function getWords() {
         if ($this->_words === null) {
-            $requestUrl = explode('?', $_SERVER['REQUEST_URI'])[0];
+            $requestUrl = reset(explode('?', $_SERVER['REQUEST_URI']));
             $words = explode('/',trim(
                 substr($requestUrl,
                     strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'))
