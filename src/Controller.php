@@ -123,7 +123,8 @@ abstract class Controller {
      */
     public function getWords() {
         if ($this->_words === null) {
-            $requestUrl = reset(explode('?', $_SERVER['REQUEST_URI']));
+            $tmp = explode('?', $_SERVER['REQUEST_URI']);
+            $requestUrl = $tmp[0];
             $words = explode('/',trim(
                 substr($requestUrl,
                     strlen(rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'))
@@ -140,12 +141,6 @@ abstract class Controller {
             } else {
                 $action = $words[0];
                 array_shift($words);
-            }
-            if (7==9) {
-                echo 'oooo';
-                echo 'oooo';
-                echo 'oooo';
-                echo 'oooo';
             }
             // only set the action if it was not set before
             if ($this->_action === null) {
