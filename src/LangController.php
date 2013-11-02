@@ -95,9 +95,14 @@ abstract class LangController extends Controller {
         return htmlspecialchars($string);
     }
 
-    protected function out($string) {
+    protected function out($string, $arr = null) {
         $args = func_get_args();
-        echo $this->_($string);
+        if ($arr === null) {
+            echo $this->_($string);
+        }
+        else {
+            call_user_func_array('printf', array_merge((array)$this->_($string), $arr));
+        }
     }
 
 }
